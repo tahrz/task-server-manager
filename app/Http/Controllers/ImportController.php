@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use DateTime;
 use App\Model\ServerItem;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Service\PaginatorInterface;
@@ -25,9 +23,6 @@ use Illuminate\Contracts\Foundation\Application;
  */
 class ImportController extends Controller
 {
-    private const HISTORY_LIMIT = 5;
-    private const IMPORT_FOLDER = '/import/';
-
     /**
      * @var ItemParserInterface
      */
@@ -91,7 +86,7 @@ class ImportController extends Controller
     public function importAction(Request $request): RedirectResponse
     {
         $filename = $request->file('dump');
-        [$create, $update, $delete] = $this->prepareActionCollections($this->storeImportedFile($filename));
+        [$create, $update, $delete] = $this->prepareActionCollections($this->parser->storeImportedFile($filename));
 
         DB::transaction(function () use ($create, $update, $delete) {
             $this->repository->chunkCreate(100, $create);
@@ -102,24 +97,6 @@ class ImportController extends Controller
         $request->session()->flash('status', 'Successful imported data!');
 
         return back();
-    }
-
-    /**
-     * @param UploadedFile $file
-     * @return string
-     */
-    private function storeImportedFile(UploadedFile $file): string
-    {
-        $files = Storage::allFiles(self::IMPORT_FOLDER);
-
-        if (\count($files) >= self::HISTORY_LIMIT) {
-            Storage::delete($files[0]);
-        }
-
-        $generatedFilename = (new DateTime())->format('Y-M-d H:i:s') . '.json';
-        $file->storeAs(self::IMPORT_FOLDER, $generatedFilename);
-
-        return '/import/' . $generatedFilename;
     }
 
     /**
