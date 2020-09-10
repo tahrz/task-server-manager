@@ -3,8 +3,8 @@
 namespace Tests\Unit;
 
 use App\Model\ServerItem;
-use App\Model\ServerItemFactory;
 use PHPUnit\Framework\TestCase;
+use App\Model\ServerItemFactory;
 
 /**
  * Class ServerItemFactoryTest
