@@ -37,8 +37,6 @@ class JsonItemParser implements ItemParserInterface
                 isset($item['drive_label']) === true &&
                 isset($item['price']) === true) {
                 $collectionFromData->add((new ServerItemFactory())($item));
-            } else {
-                Log::warning('[parsing problem]: ', $item);
             }
         }
 
